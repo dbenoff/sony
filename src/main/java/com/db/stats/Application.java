@@ -1,92 +1,68 @@
 package com.db.stats;
 
 
+import com.db.stats.model.TreeNode;
+import com.db.stats.service.TreeDataService;
+import com.db.stats.service.TreeTraverseService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.CommandLineRunner;
+import org.springframework.boot.SpringApplication;
+import org.springframework.boot.autoconfigure.SpringBootApplication;
 
-import java.io.File;
-import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.attribute.BasicFileAttributeView;
-import java.nio.file.attribute.BasicFileAttributes;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.LinkedList;
-import java.util.Queue;
+import java.util.*;
 
-public class Application {
+@SpringBootApplication
+public class Application implements CommandLineRunner{
+
+    @Autowired
+    private TreeDataService treeDataService;
+    @Autowired
+    private TreeTraverseService treeTraverseService;
 
     private final Logger log = LoggerFactory.getLogger(this.getClass());
 
 
     public static void main(String[] args) {
-        Application app = new Application();
+        SpringApplication.run(Application.class, args);
+    }
+
+    @Override
+    public void run(String... args) throws Exception {
+        String pathString = null, type = null, format = null;
         if(args != null && args.length > 2 && (args[1].equalsIgnoreCase("bfs") || args[1].equalsIgnoreCase("dfs"))
                 && (args[2].equalsIgnoreCase("normal") || args[2].equalsIgnoreCase("detailed"))){
-            if(args.length > 2)
-            app.run(args[0], args[1], args[2]);
+            if(args.length > 2){
+                pathString = args[0];
+                type = args[1];
+                format = args[2];
+            }
         }else{
-            throw new RuntimeException("must provide a file path, search type (bfs|dfs), and output (normal|detailed) in the syntax <path> <type> <output>");
+            log.warn("must provide a file path, search type (bfs|dfs), and output (normal|detailed) in the syntax <path> <type> <output>");
+            return;
         }
-    }
 
-    private void run(String pathString, String type, String format){
-        Collection<File> paths;
-        File path = new File(pathString);
+
+        Collection<TreeNode> paths;
+        TreeNode path = treeDataService.getTreeNode(pathString);
         if(type.equalsIgnoreCase("bfs")){
-            paths = bfs(path);
+            paths = treeTraverseService.bfs(path);
         }else{
-            paths = new ArrayList<>();
-            dfs(path, paths);
+            paths = treeTraverseService.dfs(path);
         }
-        for(File childPath : paths){
-            try {
-                long size = Files.walk(childPath.toPath()).mapToLong(p -> p.toFile().length() ).sum();
-                BasicFileAttributes view
-                        = Files.getFileAttributeView(childPath.toPath(), BasicFileAttributeView.class)
-                        .readAttributes();
-                if(format.equalsIgnoreCase("normal")){
-                    System.out.println(childPath.getPath());
-                }else{
-                    System.out.println(childPath.getPath() + " size: " + size + " modified: " + view.lastModifiedTime());
-                }
-
-            } catch (IOException e) {
-                log.warn(e.getMessage());
-                throw new RuntimeException();
+        for(TreeNode childPath : paths){
+            if(format.equalsIgnoreCase("normal")){
+                System.out.println(childPath.getName());
+            }else{
+                System.out.println(childPath.getName() + " size: " + childPath.getSize() + " modified: " + childPath.getModified());
             }
         }
+
     }
 
-    private Collection<File> bfs(File root){
-        Collection<File> all = new ArrayList<>();
-        Queue<File> q = new LinkedList<File>();
-        q.add(root);
-        while (!q.isEmpty()) {
-            File file = q.remove();
-            File[] children = file.listFiles();
-            if (children != null) {
-                for (File child : children) {
-                    if (child.isDirectory()) {
-                        q.add(child);
-                        all.add(child);
-                    }
-                }
-            }
-        }
-        return all;
-    }
-
-    private void dfs(File file, Collection<File> all) {
-        File[] children = file.listFiles();
-        if (children != null) {
-            for (File child : children) {
-                if (child.isDirectory()) {
-                    all.add(child);
-                    dfs(child, all);
-                }
-            }
-        }
+    public void setTreeDataService(TreeDataService treeDataService) {
+        this.treeDataService = treeDataService;
     }
 
 }
