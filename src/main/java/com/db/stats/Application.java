@@ -3,7 +3,7 @@ package com.db.stats;
 
 import com.db.stats.model.TreeNode;
 import com.db.stats.service.TreeDataService;
-import com.db.stats.service.TreeTraverseService;
+import com.db.stats.algo.TreeTraverser;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -19,7 +19,7 @@ public class Application implements CommandLineRunner{
     @Autowired
     private TreeDataService treeDataService;
     @Autowired
-    private TreeTraverseService treeTraverseService;
+    private TreeTraverser treeTraversalHelper;
 
     private final Logger log = LoggerFactory.getLogger(this.getClass());
 
@@ -47,22 +47,18 @@ public class Application implements CommandLineRunner{
         Collection<TreeNode> paths;
         TreeNode path = treeDataService.getTreeNode(pathString);
         if(type.equalsIgnoreCase("bfs")){
-            paths = treeTraverseService.bfs(path);
+            paths = treeTraversalHelper.bfs(path);
         }else{
-            paths = treeTraverseService.dfs(path);
+            paths = treeTraversalHelper.dfs(path);
         }
         for(TreeNode childPath : paths){
             if(format.equalsIgnoreCase("normal")){
-                System.out.println(childPath.getName());
+                log.info(childPath.getName());
             }else{
-                System.out.println(childPath.getName() + " size: " + childPath.getSize() + " modified: " + childPath.getModified());
+                log.info(childPath.getName() + " size: " + childPath.getSize() + " modified: " + childPath.getModified());
             }
         }
 
-    }
-
-    public void setTreeDataService(TreeDataService treeDataService) {
-        this.treeDataService = treeDataService;
     }
 
 }

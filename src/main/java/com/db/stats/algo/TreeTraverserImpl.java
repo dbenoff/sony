@@ -1,4 +1,4 @@
-package com.db.stats.service;
+package com.db.stats.algo;
 
 import com.db.stats.model.TreeNode;
 import org.springframework.stereotype.Service;
@@ -6,7 +6,8 @@ import org.springframework.stereotype.Service;
 import java.util.*;
 
 @Service
-public class TreeTraverseServiceImpl implements TreeTraverseService {
+public class TreeTraverserImpl implements TreeTraverser {
+
     @Override
     public List<TreeNode> dfs(TreeNode file){
         List<TreeNode> all = new ArrayList<>();

@@ -11,6 +11,9 @@ import java.util.Collection;
 import java.util.Date;
 import java.util.List;
 
+/**
+ * TreeNode wrapping a file handle in a filesystem
+ */
 public class FileSystemTreeNode implements TreeNode {
 
     private File file;
