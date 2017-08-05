@@ -7,7 +7,7 @@ import com.db.model.TreeNode;
  */
 public interface NodeProcessor
 {
-    public void process(TreeNode node) throws NodeProcessingException;
+    void process(TreeNode node) throws NodeProcessingException;
 
-    public String getProcessingReport();
+    String getProcessingReport();
 }
